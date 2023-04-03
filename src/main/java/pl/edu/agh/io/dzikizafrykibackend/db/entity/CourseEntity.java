@@ -1,14 +1,14 @@
 package pl.edu.agh.io.dzikizafrykibackend.db.entity;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "courses")
 public class CourseEntity {
@@ -21,9 +21,6 @@ public class CourseEntity {
 
     @Column(name = "description")
     private String desc;
-
-    @ManyToMany(mappedBy = "studentCourses")
-    Set<StudentEntity> students;
 
     @Column(name = "users")
     @ElementCollection

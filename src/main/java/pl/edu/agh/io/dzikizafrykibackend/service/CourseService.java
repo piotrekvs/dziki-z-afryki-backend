@@ -10,7 +10,6 @@ import pl.edu.agh.io.dzikizafrykibackend.model.CourseUpdate;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -28,22 +27,29 @@ public class CourseService {
                 .toList();
     }
 
-    public Course postCourse(String name, String desc, List<String> users) {
-        CourseEntity course = CourseEntity.builder()
-                .name(name)
-                .desc(desc)
-                .users(users)
-                .build();
-        courseRepository.save(course);
+    public void deleteCourse(int courseId) {
+        courseRepository.deleteById(courseId);
+    }
 
-        return Course.fromEntity(course);
+    public Course postCourse(CourseUpdate course) {
+        if (course.getName().isEmpty()) {
+            throw new CourseNameMissingException();
+        }
+        CourseEntity courseEntity = CourseEntity.builder()
+                .name(course.getName().get())
+                .desc(course.getDescription().orElse(null))
+                .users(course.getUsers().orElse(null))
+                .build();
+        courseRepository.save(courseEntity);
+
+        return Course.fromEntity(courseEntity);
     }
 
     public Course putCourse(int courseId, CourseUpdate course) {
         return courseRepository.findById(courseId)
                 .map(entity -> updateCourse(entity, course))
                 .map(Course::fromEntity)
-                .orElseGet(() -> postCourse(course));
+                .orElseGet(() -> postCourse(courseId, course));
     }
 
     private CourseEntity updateCourse(CourseEntity entity, CourseUpdate update) {
@@ -53,15 +59,18 @@ public class CourseService {
         return entity;
     }
 
-    private Course postCourse(CourseUpdate course) {
-        // for now only course name is mandatory
-        if(course.getName().isEmpty()) {
+    private Course postCourse(int courseId, CourseUpdate course) {
+        if (course.getName().isEmpty()) {
             throw new CourseNameMissingException();
         }
-        return postCourse(course.getName().get(), course.getDescription().orElse(""), course.getUsers().orElse(List.of()));
-    }
+        CourseEntity courseEntity = CourseEntity.builder()
+                .id(courseId)
+                .name(course.getName().get())
+                .desc(course.getDescription().orElse(null))
+                .users(course.getUsers().orElse(null))
+                .build();
+        courseRepository.save(courseEntity);
 
-    public void deleteCourse(int courseId) {
-        courseRepository.deleteById(courseId);
+        return Course.fromEntity(courseEntity);
     }
 }

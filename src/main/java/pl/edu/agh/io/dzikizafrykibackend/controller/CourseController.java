@@ -1,26 +1,32 @@
 package pl.edu.agh.io.dzikizafrykibackend.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.io.dzikizafrykibackend.exception.CourseMissingException;
 import pl.edu.agh.io.dzikizafrykibackend.model.Course;
-import pl.edu.agh.io.dzikizafrykibackend.model.CourseList;
 import pl.edu.agh.io.dzikizafrykibackend.model.CourseUpdate;
 import pl.edu.agh.io.dzikizafrykibackend.service.CourseService;
 
 import java.util.List;
-import java.util.Set;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/course")
 public class CourseController {
     private final CourseService courseService;
 
+    @GetMapping("/test")
+    private Course getTestCourse() {
+        return Course.builder()
+                .name("Test name")
+                .description("Test desc")
+                .users(List.of("Kasia", "Basia"))
+                .build();
+    }
+
     @PostMapping
-    private Course postCourse(String name, String desc, List<String> users) {
-        return courseService.postCourse(name, desc, users);
+    private Course postCourse(@RequestBody CourseUpdate course) {
+        return courseService.postCourse(course);
     }
 
     @PutMapping("/{courseId}")
@@ -33,20 +39,10 @@ public class CourseController {
         return courseService.getCourse(courseId)
                 .orElseThrow(CourseMissingException::new);
     }
-    @GetMapping("/test")
-    private Course getTestCourse() {
-        return Course.builder()
-                .name("Test name")
-                .description("Test desc")
-                .users(List.of("Kasia", "Basia"))
-                .build();
-    }
+
     @GetMapping
-    private CourseList getAllCourses() {
-        // return courseService.getAllCourses();
-        return CourseList.builder()
-                .courseList(courseService.getAllCourses())
-                .build();
+    private List<Course> getAllCourses() {
+        return courseService.getAllCourses();
     }
 
     @DeleteMapping("/{courseId}")
