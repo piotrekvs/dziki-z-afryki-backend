@@ -7,6 +7,8 @@ import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(exclude = {"users", "dates"})
+@ToString(exclude = {"users", "dates"})
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,9 +26,19 @@ public class CourseEntity {
     @Column(name = "description")
     private String desc;
 
-    @ManyToMany(mappedBy = "userCourses")
+    @ManyToMany
+    @JoinTable(
+            name = "courses_users",
+            inverseJoinColumns = @JoinColumn(name = "user_id"),
+            joinColumns = @JoinColumn(name = "course_id")
+    )
     Set<UserEntity> users;
 
-    @ManyToMany(mappedBy = "dateCourses")
+    @ManyToMany
+    @JoinTable(
+            name = "courses_dates",
+            inverseJoinColumns = @JoinColumn(name = "date_id"),
+            joinColumns = @JoinColumn(name = "course_id")
+    )
     Set<DateEntity> dates;
 }

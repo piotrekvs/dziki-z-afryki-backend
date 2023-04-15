@@ -2,6 +2,7 @@ package pl.edu.agh.io.dzikizafrykibackend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.edu.agh.io.dzikizafrykibackend.db.entity.CourseEntity;
 import pl.edu.agh.io.dzikizafrykibackend.db.entity.DateEntity;
 import pl.edu.agh.io.dzikizafrykibackend.db.entity.UserEntity;
@@ -13,7 +14,6 @@ import pl.edu.agh.io.dzikizafrykibackend.model.Course;
 import pl.edu.agh.io.dzikizafrykibackend.model.CourseUpdate;
 import pl.edu.agh.io.dzikizafrykibackend.model.DateResource;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

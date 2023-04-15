@@ -52,12 +52,7 @@ public class UserEntity implements UserDetails {
     @NotNull
     private String hashedPassword;
 
-    @ManyToMany
-    @JoinTable(
-            name = "courses_users",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id")
-    )
+    @ManyToMany(mappedBy = "users")
     Set<CourseEntity> userCourses;
 
     @ManyToMany

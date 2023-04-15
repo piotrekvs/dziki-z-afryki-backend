@@ -12,7 +12,7 @@ import pl.edu.agh.io.dzikizafrykibackend.service.CourseService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/course")
+@RequestMapping("/course")
 @RequiredArgsConstructor
 public class CourseController {
     private final CourseService courseService;

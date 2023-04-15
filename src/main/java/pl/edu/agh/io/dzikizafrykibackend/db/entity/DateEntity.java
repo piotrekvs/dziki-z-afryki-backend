@@ -34,12 +34,7 @@ public class DateEntity {
     @NotNull
     private LocalTime endTime;
 
-    @ManyToMany
-    @JoinTable(
-            name = "courses_dates",
-            joinColumns = @JoinColumn(name = "date_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id")
-    )
+    @ManyToMany(mappedBy = "dates")
     Set<CourseEntity> dateCourses;
 
     @ManyToMany(mappedBy = "userDates")
