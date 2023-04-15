@@ -11,13 +11,14 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @Entity
 @Table(name = "user_account")
-public class User implements UserDetails {
+public class UserEntity implements UserDetails {
 
     @Id
     @GeneratedValue
@@ -51,7 +52,23 @@ public class User implements UserDetails {
     @NotNull
     private String hashedPassword;
 
-    public User(
+    @ManyToMany
+    @JoinTable(
+            name = "courses_users",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    Set<CourseEntity> userCourses;
+
+    @ManyToMany
+    @JoinTable(
+            name = "dates_users",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "date_id")
+    )
+    Set<DateEntity> userDates;
+
+    public UserEntity(
             String email,
             String firstname,
             String lastname,

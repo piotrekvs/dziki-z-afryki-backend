@@ -3,10 +3,11 @@ package pl.edu.agh.io.dzikizafrykibackend.db.entity;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
+import javax.validation.constraints.NotNull;
+import java.util.Set;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -17,12 +18,15 @@ public class CourseEntity {
     private int id;
 
     @Column(name = "name")
+    @NotNull
     private String name;
 
     @Column(name = "description")
     private String desc;
 
-    @Column(name = "users")
-    @ElementCollection
-    private List<String> users;
+    @ManyToMany(mappedBy = "userCourses")
+    Set<UserEntity> users;
+
+    @ManyToMany(mappedBy = "dateCourses")
+    Set<DateEntity> dates;
 }

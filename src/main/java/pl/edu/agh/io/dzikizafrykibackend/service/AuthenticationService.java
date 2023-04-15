@@ -4,9 +4,11 @@ package pl.edu.agh.io.dzikizafrykibackend.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.edu.agh.io.dzikizafrykibackend.db.entity.User;
+import pl.edu.agh.io.dzikizafrykibackend.db.entity.UserEntity;
+import pl.edu.agh.io.dzikizafrykibackend.db.entity.UserRole;
 import pl.edu.agh.io.dzikizafrykibackend.db.repository.UserRepository;
 import pl.edu.agh.io.dzikizafrykibackend.model.AuthenticationRequestResource;
 import pl.edu.agh.io.dzikizafrykibackend.model.AuthenticationResponseResource;
@@ -29,13 +31,13 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponseResource register(RegisterRequestResource registerRequestResource) {
-        User newUser = new User(registerRequestResource.getEmail(),
-                                registerRequestResource.getFirstname(),
-                                registerRequestResource.getLastname(),
-                                registerRequestResource.getRole(),
-                                registerRequestResource.getIndexNumber(),
-                                true,
-                                passwordEncoder.encode(registerRequestResource.getPassword()));
+        UserEntity newUser = new UserEntity(registerRequestResource.getEmail(),
+                                            registerRequestResource.getFirstname(),
+                                            registerRequestResource.getLastname(),
+                                            registerRequestResource.getRole(),
+                                            registerRequestResource.getIndexNumber(),
+                                            true,
+                                            passwordEncoder.encode(registerRequestResource.getPassword()));
 
         userRepository.save(newUser);
         return new AuthenticationResponseResource(jwtService.generateToken(newUser));
@@ -47,7 +49,11 @@ public class AuthenticationService {
                         authenticationRequestResource.getPassword()
                 )
         );
-        User user = userRepository.findByEmail(authenticationRequestResource.getEmail()).orElseThrow();
+        UserEntity user = userRepository.findByEmail(authenticationRequestResource.getEmail()).orElseThrow();
         return new AuthenticationResponseResource(jwtService.generateToken(user));
+    }
+
+    public void verifyRole(Authentication authentication, UserRole... roles) {
+        System.out.println(authentication.getDetails());
     }
 }
