@@ -22,10 +22,10 @@ public class RegisterRequestResource {
     private String email;
 
     @NotNull
-    private String firstname;
+    private String firstName;
 
     @NotNull
-    private String lastname;
+    private String lastName;
 
     @NotNull
     private String password;

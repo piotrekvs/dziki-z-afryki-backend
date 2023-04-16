@@ -21,4 +21,8 @@ public class CourseUpdate {
     Optional<Set<String>> users = Optional.empty();
     @Builder.Default
     Optional<Set<DateResource>> dates = Optional.empty();
+    @Builder.Default
+    Optional<String> owner = Optional.empty();
+    @Builder.Default
+    Optional<String> code = Optional.empty();
 }

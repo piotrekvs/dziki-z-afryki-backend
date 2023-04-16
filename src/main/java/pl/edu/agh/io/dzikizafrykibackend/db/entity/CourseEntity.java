@@ -41,4 +41,11 @@ public class CourseEntity {
             joinColumns = @JoinColumn(name = "course_id")
     )
     Set<DateEntity> dates;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private UserEntity owner;
+
+    @Column(name = "code")
+    private String code;
 }

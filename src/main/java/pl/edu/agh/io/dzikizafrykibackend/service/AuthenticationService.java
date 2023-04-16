@@ -32,8 +32,8 @@ public class AuthenticationService {
 
     public AuthenticationResponseResource register(RegisterRequestResource registerRequestResource) {
         UserEntity newUser = new UserEntity(registerRequestResource.getEmail(),
-                                            registerRequestResource.getFirstname(),
-                                            registerRequestResource.getLastname(),
+                                            registerRequestResource.getFirstName(),
+                                            registerRequestResource.getLastName(),
                                             registerRequestResource.getRole(),
                                             registerRequestResource.getIndexNumber(),
                                             true,

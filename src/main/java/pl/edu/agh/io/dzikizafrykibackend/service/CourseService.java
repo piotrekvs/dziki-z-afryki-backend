@@ -9,6 +9,7 @@ import pl.edu.agh.io.dzikizafrykibackend.db.entity.UserEntity;
 import pl.edu.agh.io.dzikizafrykibackend.db.repository.CourseRepository;
 import pl.edu.agh.io.dzikizafrykibackend.db.repository.DateRepository;
 import pl.edu.agh.io.dzikizafrykibackend.db.repository.UserRepository;
+import pl.edu.agh.io.dzikizafrykibackend.exception.CourseMissingException;
 import pl.edu.agh.io.dzikizafrykibackend.exception.CourseNameMissingException;
 import pl.edu.agh.io.dzikizafrykibackend.model.Course;
 import pl.edu.agh.io.dzikizafrykibackend.model.CourseUpdate;
@@ -30,9 +31,9 @@ public class CourseService {
     private final DateRepository dateRepository;
 
     @Transactional
-    public Optional<Course> getCourse(int courseId) {
+    public Course getCourse(int courseId) {
         Optional<CourseEntity> course = courseRepository.findById(courseId);
-        return course.map(Course::fromEntity);
+        return course.map(Course::fromEntity).orElseThrow(CourseMissingException::new);
     }
 
     @Transactional
@@ -44,7 +45,11 @@ public class CourseService {
 
     @Transactional
     public void deleteCourse(int courseId) {
-        courseRepository.deleteById(courseId);
+        if (courseRepository.existsById(courseId)) {
+            courseRepository.deleteById(courseId);
+        } else {
+            throw new CourseMissingException();
+        }
     }
 
     @Transactional
@@ -58,6 +63,8 @@ public class CourseService {
                 .desc(course.getDescription().orElse(null))
                 .users(course.getUsers().map(this::usersFrom).orElse(EMPTY_USER_SET))
                 .dates(course.getDates().map(this::datesFrom).orElse(EMPTY_DATE_SET))
+                .owner(this.usersFrom(Set.of(course.getOwner().get())).stream().findFirst().get())
+                .code(course.getCode().orElse(null))
                 .build();
 
         courseRepository.save(courseEntity);
@@ -66,11 +73,16 @@ public class CourseService {
     }
 
     @Transactional
-    public Course putCourse(int courseId, CourseUpdate course) {
-        return courseRepository.findById(courseId)
-                .map(entity -> updateCourse(entity, course))
+    public Course putCourse(int courseId, CourseUpdate update) {
+        Optional<CourseEntity> course = courseRepository.findById(courseId);
+        if (course.isEmpty()) {
+            throw new CourseMissingException();
+        }
+
+        return course
+                .map(entity -> updateCourse(entity, update))
                 .map(Course::fromEntity)
-                .orElseGet(() -> postCourse(courseId, course));
+                .get();
     }
 
     private CourseEntity updateCourse(CourseEntity entity, CourseUpdate update) {
@@ -79,23 +91,6 @@ public class CourseService {
         update.getDates().map(this::datesFrom).ifPresent(entity::setDates);
         courseRepository.save(entity);
         return entity;
-    }
-
-    private Course postCourse(int courseId, CourseUpdate course) {
-        if (course.getName().isEmpty()) {
-            throw new CourseNameMissingException();
-        }
-        CourseEntity courseEntity = CourseEntity.builder()
-                .id(courseId)
-                .name(course.getName().get())
-                .desc(course.getDescription().orElse(null))
-                .users(course.getUsers().map(this::usersFrom).orElse(EMPTY_USER_SET))
-                .dates(course.getDates().map(this::datesFrom).orElse(EMPTY_DATE_SET))
-                .build();
-
-        courseRepository.save(courseEntity);
-
-        return Course.fromEntity(courseEntity);
     }
 
     private Set<UserEntity> usersFrom(Set<String> emails) {

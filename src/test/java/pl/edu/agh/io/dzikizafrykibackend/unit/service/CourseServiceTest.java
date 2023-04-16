@@ -13,9 +13,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.agh.io.dzikizafrykibackend.db.entity.CourseEntity;
 import pl.edu.agh.io.dzikizafrykibackend.db.entity.DateEntity;
 import pl.edu.agh.io.dzikizafrykibackend.db.entity.UserEntity;
+import pl.edu.agh.io.dzikizafrykibackend.db.entity.UserRole;
 import pl.edu.agh.io.dzikizafrykibackend.db.repository.CourseRepository;
 import pl.edu.agh.io.dzikizafrykibackend.db.repository.DateRepository;
 import pl.edu.agh.io.dzikizafrykibackend.db.repository.UserRepository;
+import pl.edu.agh.io.dzikizafrykibackend.exception.CourseMissingException;
+import pl.edu.agh.io.dzikizafrykibackend.exception.CourseNameMissingException;
 import pl.edu.agh.io.dzikizafrykibackend.model.Course;
 import pl.edu.agh.io.dzikizafrykibackend.model.CourseUpdate;
 import pl.edu.agh.io.dzikizafrykibackend.service.CourseService;
@@ -30,7 +33,10 @@ import static org.mockito.Mockito.*;
 public class CourseServiceTest {
     private static final String COURSE_NAME = "test";
     private static final String COURSE_NAME_2 = "test2";
+    private static final String COURSE_CODE = "code";
+    private static final String COURSE_CODE_2 = "code2";
     private static final int COURSE_ID = 5;
+    private static final UserEntity COURSE_OWNER = new UserEntity("aaa@bb.cc", "aaa", "bbb", UserRole.TEACHER, null, true, "aaa");
 
     private static final Set<UserEntity> EMPTY_USER_SET = Set.of();
     private static final Set<DateEntity> EMPTY_DATE_SET = Set.of();
@@ -47,11 +53,24 @@ public class CourseServiceTest {
     @Test
     void shouldGetCourse() {
         // given
+        when(courseRepositoryMock.findById(COURSE_ID))
+                .thenReturn(Optional.of(new CourseEntity(COURSE_ID, COURSE_NAME, "", EMPTY_USER_SET, EMPTY_DATE_SET, COURSE_OWNER, COURSE_CODE)));
 
         // when
         courseService.getCourse(COURSE_ID);
 
         // then
+        verify(courseRepositoryMock).findById(COURSE_ID);
+    }
+
+    @Test
+    void shouldThrowWhenGetCourseOnNonExistentCourse() {
+        // given
+        when(courseRepositoryMock.findById(COURSE_ID)).thenReturn(Optional.empty());
+
+        // when
+        // then
+        Assertions.assertThrows(CourseMissingException.class, () -> courseService.getCourse(COURSE_ID));
         verify(courseRepositoryMock).findById(COURSE_ID);
     }
 
@@ -69,12 +88,24 @@ public class CourseServiceTest {
     @Test
     void shouldDeleteCourse() {
         // given
+        when(courseRepositoryMock.existsById(COURSE_ID)).thenReturn(true);
 
         // when
         courseService.deleteCourse(COURSE_ID);
 
         // then
         verify(courseRepositoryMock).deleteById(COURSE_ID);
+    }
+
+    @Test
+    void shouldThrowWhenDeleteNonExistentCourse() {
+        // given
+        when(courseRepositoryMock.existsById(COURSE_ID)).thenReturn(false);
+
+        // when
+        // then
+        Assertions.assertThrows(CourseMissingException.class, () -> courseService.deleteCourse(COURSE_ID));
+        verify(courseRepositoryMock, never()).deleteById(COURSE_ID);
     }
 
     @ParameterizedTest
@@ -84,6 +115,8 @@ public class CourseServiceTest {
         for (DateEntity date : expected.getDates()) {
             when(dateRepositoryMock.save(date)).thenReturn(date);
         }
+
+        when(userRepositoryMock.findByEmail(COURSE_OWNER.getEmail())).thenReturn(Optional.of(COURSE_OWNER));
 
         // when
         courseService.postCourse(request);
@@ -98,6 +131,20 @@ public class CourseServiceTest {
     }
 
     @Test
+    void shouldThrowWhenPostCourseWithoutName() {
+        // given
+        CourseUpdate request = CourseUpdate.builder()
+                .name(Optional.empty())
+                .build();
+
+        // when
+        Assertions.assertThrows(CourseNameMissingException.class, () -> courseService.postCourse(request));
+
+        // then
+        verifyNoInteractions(courseRepositoryMock);
+    }
+
+    @Test
     void shouldPutCourseOnExistingCourse() {
         // given
         CourseEntity courseEntity = CourseEntity.builder()
@@ -105,6 +152,8 @@ public class CourseServiceTest {
                 .name(COURSE_NAME)
                 .users(EMPTY_USER_SET)
                 .dates(EMPTY_DATE_SET)
+                .owner(COURSE_OWNER)
+                .code(COURSE_CODE)
                 .build();
 
         CourseUpdate courseUpdate = CourseUpdate.builder()
@@ -129,41 +178,31 @@ public class CourseServiceTest {
     }
 
     @Test
-    void shouldPutCourseOnNonexistentCourse() {
+    void shouldThrowWhenPutCourseOnNonexistentCourse() {
         // given
         CourseUpdate courseUpdate = CourseUpdate.builder()
                 .name(Optional.of(COURSE_NAME))
                 .build();
 
-        CourseEntity addedCourseEntity = CourseEntity.builder()
-                .id(COURSE_ID)
-                .name(COURSE_NAME)
-                .users(EMPTY_USER_SET)
-                .dates(EMPTY_DATE_SET)
-                .build();
-
         when(courseRepositoryMock.findById(COURSE_ID)).thenReturn(Optional.empty());
 
-        // when
-        Course addedCourse = courseService.putCourse(COURSE_ID, courseUpdate);
-
         // then
-        verify(courseRepositoryMock).findById(COURSE_ID);
-        verify(courseRepositoryMock).save(addedCourseEntity);
-
-        Assertions.assertEquals(COURSE_ID, addedCourse.getCourseId());
-        Assertions.assertEquals(COURSE_NAME, addedCourse.getName());
+        Assertions.assertThrows(CourseMissingException.class, () -> courseService.putCourse(COURSE_ID, courseUpdate));
     }
 
     private static Stream<Arguments> providerForPostTest() {
         return Stream.of(
                 Arguments.of(CourseUpdate.builder()
                                      .name(Optional.of(COURSE_NAME))
+                                     .owner(Optional.of(COURSE_OWNER.getEmail()))
+                                     .code(Optional.of(COURSE_CODE))
                                      .build(),
                              CourseEntity.builder()
                                      .name(COURSE_NAME)
                                      .dates(Set.of())
                                      .users(Set.of())
+                                     .code(COURSE_CODE)
+                                     .owner(COURSE_OWNER)
                                      .build())
         );
     }

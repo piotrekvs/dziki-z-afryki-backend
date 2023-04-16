@@ -15,6 +15,8 @@ public class Course {
     String description;
     Set<String> users;
     Set<DateResource> dates;
+    String owner;
+    String code;
 
 
     public static Course fromEntity(CourseEntity entity) {
@@ -23,11 +25,13 @@ public class Course {
                 .name(entity.getName())
                 .description(entity.getDesc())
                 .users(entity.getUsers().stream()
-                               .map(e -> e.getFirstname() + " " + e.getLastname())
+                               .map(e -> e.getFirstName() + " " + e.getLastName())
                                .collect(Collectors.toSet()))
                 .dates(entity.getDates().stream()
                                .map(DateResource::fromEntity)
                                .collect(Collectors.toSet()))
+                .owner(entity.getOwner().getFirstName() + " " + entity.getOwner().getLastName())
+                .code(entity.getCode())
                 .build();
     }
 }

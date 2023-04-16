@@ -4,16 +4,20 @@ package pl.edu.agh.io.dzikizafrykibackend.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.lang.NonNull;
+import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor(force = true)
 public class AuthenticationRequestResource {
 
-    @NonNull
+    @Email
     public String email;
 
-    @NonNull
+    @NotNull
     public String password;
 }

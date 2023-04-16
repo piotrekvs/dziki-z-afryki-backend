@@ -30,11 +30,11 @@ public class UserEntity implements UserDetails {
 
     @Column
     @NotNull
-    private String firstname;
+    private String firstName;
 
     @Column
     @NotNull
-    private String lastname;
+    private String lastName;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -65,16 +65,16 @@ public class UserEntity implements UserDetails {
 
     public UserEntity(
             String email,
-            String firstname,
-            String lastname,
+            String firstName,
+            String lastName,
             UserRole role,
             Integer indexNumber,
             Boolean isVerified,
             String hashedPassword
     ) {
         this.email = email;
-        this.firstname = firstname;
-        this.lastname = lastname;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.role = role;
         this.indexNumber = indexNumber;
         this.isVerified = isVerified;

@@ -28,8 +28,7 @@ public class CourseController {
     @GetMapping("/{courseId}")
     @Secured({UserRole.ROLE_TEACHER, UserRole.ROLE_STUDENT})
     public Course getCourse(@PathVariable int courseId) {
-        return courseService.getCourse(courseId)
-                .orElseThrow(CourseMissingException::new);
+        return courseService.getCourse(courseId);
     }
 
     @GetMapping
