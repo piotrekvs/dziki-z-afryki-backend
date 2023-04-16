@@ -34,7 +34,6 @@ public class CourseServiceTest {
     private static final String COURSE_NAME = "test";
     private static final String COURSE_NAME_2 = "test2";
     private static final String COURSE_CODE = "code";
-    private static final String COURSE_CODE_2 = "code2";
     private static final int COURSE_ID = 5;
     private static final UserEntity COURSE_OWNER = new UserEntity("aaa@bb.cc", "aaa", "bbb", UserRole.TEACHER, null, true, "aaa");
 

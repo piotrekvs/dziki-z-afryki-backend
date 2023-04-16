@@ -74,15 +74,10 @@ public class CourseService {
 
     @Transactional
     public Course putCourse(int courseId, CourseUpdate update) {
-        Optional<CourseEntity> course = courseRepository.findById(courseId);
-        if (course.isEmpty()) {
-            throw new CourseMissingException();
-        }
-
-        return course
+        return courseRepository.findById(courseId)
                 .map(entity -> updateCourse(entity, update))
                 .map(Course::fromEntity)
-                .get();
+                .orElseThrow(CourseMissingException::new);
     }
 
     private CourseEntity updateCourse(CourseEntity entity, CourseUpdate update) {
