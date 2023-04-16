@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import pl.edu.agh.io.dzikizafrykibackend.db.entity.UserEntity;
 import pl.edu.agh.io.dzikizafrykibackend.db.entity.UserRole;
 import pl.edu.agh.io.dzikizafrykibackend.db.repository.UserRepository;
+import pl.edu.agh.io.dzikizafrykibackend.exception.DuplicateUserException;
 import pl.edu.agh.io.dzikizafrykibackend.model.AuthenticationRequestResource;
 import pl.edu.agh.io.dzikizafrykibackend.model.AuthenticationResponseResource;
 import pl.edu.agh.io.dzikizafrykibackend.model.RegisterRequestResource;
@@ -38,7 +39,9 @@ public class AuthenticationService {
                                             registerRequestResource.getIndexNumber(),
                                             true,
                                             passwordEncoder.encode(registerRequestResource.getPassword()));
-
+        if (userRepository.findByEmail(newUser.getEmail()).isPresent()) {
+            throw new DuplicateUserException();
+        }
         userRepository.save(newUser);
         return new AuthenticationResponseResource(jwtService.generateToken(newUser));
     }
@@ -51,9 +54,5 @@ public class AuthenticationService {
         );
         UserEntity user = userRepository.findByEmail(authenticationRequestResource.getEmail()).orElseThrow();
         return new AuthenticationResponseResource(jwtService.generateToken(user));
-    }
-
-    public void verifyRole(Authentication authentication, UserRole... roles) {
-        System.out.println(authentication.getDetails());
     }
 }
