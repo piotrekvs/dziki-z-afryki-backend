@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pl.edu.agh.io.dzikizafrykibackend.db.entity.CourseEntity;
 
+import java.util.UUID;
+
 @Repository
-public interface CourseRepository extends JpaRepository<CourseEntity, Integer> {
+public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
 }

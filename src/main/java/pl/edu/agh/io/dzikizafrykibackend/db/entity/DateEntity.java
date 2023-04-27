@@ -38,5 +38,5 @@ public class DateEntity {
     Set<CourseEntity> dateCourses;
 
     @ManyToMany(mappedBy = "userDates")
-    Set<UserEntity> users;
+    Set<User> users;
 }

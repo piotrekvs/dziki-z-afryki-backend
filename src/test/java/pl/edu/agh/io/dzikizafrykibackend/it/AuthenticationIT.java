@@ -21,8 +21,8 @@ public class AuthenticationIT extends BaseIT {
     void shouldRegisterAsTeacher() throws IOException {
         // given
         RegisterRequestResource registerRequestResource = RegisterRequestResource.builder()
-                .firstname("Jan")
-                .lastname("Kowalski")
+                .firstName("Jan")
+                .lastName("Kowalski")
                 .indexNumber(null)
                 .email(STUDENT1_ID.email())
                 .password(STUDENT1_ID.password())

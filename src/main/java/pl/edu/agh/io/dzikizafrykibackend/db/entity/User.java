@@ -18,7 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "user_account")
-public class UserEntity implements UserDetails {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue
@@ -52,10 +52,10 @@ public class UserEntity implements UserDetails {
     @NotNull
     private String hashedPassword;
 
-    @ManyToMany(mappedBy = "users")
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "users")
     Set<CourseEntity> userCourses;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "dates_users",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -63,7 +63,7 @@ public class UserEntity implements UserDetails {
     )
     Set<DateEntity> userDates;
 
-    public UserEntity(
+    public User(
             String email,
             String firstName,
             String lastName,

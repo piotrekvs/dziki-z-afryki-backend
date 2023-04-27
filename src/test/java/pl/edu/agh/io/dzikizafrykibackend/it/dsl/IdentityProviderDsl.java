@@ -25,8 +25,8 @@ public class IdentityProviderDsl {
 
     public String register(UserIdentity userIdentity) throws IOException {
         RegisterRequestResource registerRequestResource = RegisterRequestResource.builder()
-                .firstname(RandomStringUtils.randomAlphabetic(5))
-                .lastname(RandomStringUtils.randomAlphabetic(5))
+                .firstName(RandomStringUtils.randomAlphabetic(5))
+                .lastName(RandomStringUtils.randomAlphabetic(5))
                 .indexNumber(userIdentity.role == UserRole.STUDENT ? RandomUtils.nextInt(0, 999999) : null)
                 .email(userIdentity.email)
                 .password(userIdentity.password)

@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(exclude = {"users", "dates"})
@@ -17,7 +18,7 @@ import java.util.Set;
 public class CourseEntity {
     @Id
     @GeneratedValue
-    private int id;
+    private UUID id;
 
     @Column(name = "name")
     @NotNull
@@ -32,7 +33,7 @@ public class CourseEntity {
             inverseJoinColumns = @JoinColumn(name = "user_id"),
             joinColumns = @JoinColumn(name = "course_id")
     )
-    Set<UserEntity> users;
+    Set<User> users;
 
     @ManyToMany
     @JoinTable(
@@ -42,10 +43,9 @@ public class CourseEntity {
     )
     Set<DateEntity> dates;
 
-    @ManyToOne
-    @JoinColumn(name = "owner_id")
-    private UserEntity owner;
+    private String ownerEmail;
 
+    @NotNull
     @Column(name = "code")
     private String code;
 }

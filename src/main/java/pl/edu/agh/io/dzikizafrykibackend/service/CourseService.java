@@ -1,29 +1,30 @@
 package pl.edu.agh.io.dzikizafrykibackend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.edu.agh.io.dzikizafrykibackend.db.entity.CourseEntity;
 import pl.edu.agh.io.dzikizafrykibackend.db.entity.DateEntity;
-import pl.edu.agh.io.dzikizafrykibackend.db.entity.UserEntity;
+import pl.edu.agh.io.dzikizafrykibackend.db.entity.User;
 import pl.edu.agh.io.dzikizafrykibackend.db.repository.CourseRepository;
 import pl.edu.agh.io.dzikizafrykibackend.db.repository.DateRepository;
 import pl.edu.agh.io.dzikizafrykibackend.db.repository.UserRepository;
+import pl.edu.agh.io.dzikizafrykibackend.exception.CourseCodeMissingException;
 import pl.edu.agh.io.dzikizafrykibackend.exception.CourseMissingException;
 import pl.edu.agh.io.dzikizafrykibackend.exception.CourseNameMissingException;
+import pl.edu.agh.io.dzikizafrykibackend.exception.InvalidOwnerException;
 import pl.edu.agh.io.dzikizafrykibackend.model.Course;
 import pl.edu.agh.io.dzikizafrykibackend.model.CourseUpdate;
 import pl.edu.agh.io.dzikizafrykibackend.model.DateResource;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CourseService {
-    private static final Set<UserEntity> EMPTY_USER_SET = Set.of();
+    private static final Set<User> EMPTY_USER_SET = Set.of();
     private static final Set<DateEntity> EMPTY_DATE_SET = Set.of();
 
     private final CourseRepository courseRepository;
@@ -31,7 +32,7 @@ public class CourseService {
     private final DateRepository dateRepository;
 
     @Transactional
-    public Course getCourse(int courseId) {
+    public Course getCourse(UUID courseId) {
         Optional<CourseEntity> course = courseRepository.findById(courseId);
         return course.map(Course::fromEntity).orElseThrow(CourseMissingException::new);
     }
@@ -44,18 +45,21 @@ public class CourseService {
     }
 
     @Transactional
-    public void deleteCourse(int courseId) {
-        if (courseRepository.existsById(courseId)) {
-            courseRepository.deleteById(courseId);
-        } else {
-            throw new CourseMissingException();
-        }
+    public void deleteCourse(UserDetails userDetails, UUID courseId) {
+        CourseEntity courseEntity = courseRepository.findById(courseId)
+                .map(course -> validateOwner(course, userDetails))
+                .orElseThrow(CourseMissingException::new);
+
+        courseRepository.deleteById(courseId);
     }
 
     @Transactional
-    public Course postCourse(CourseUpdate course) {
+    public Course postCourse(UserDetails userDetails, CourseUpdate course) {
         if (course.getName().isEmpty()) {
             throw new CourseNameMissingException();
+        }
+        if (course.getCode().isEmpty()) {
+            throw new CourseCodeMissingException();
         }
 
         CourseEntity courseEntity = CourseEntity.builder()
@@ -63,8 +67,8 @@ public class CourseService {
                 .desc(course.getDescription().orElse(null))
                 .users(course.getUsers().map(this::usersFrom).orElse(EMPTY_USER_SET))
                 .dates(course.getDates().map(this::datesFrom).orElse(EMPTY_DATE_SET))
-                .owner(this.usersFrom(Set.of(course.getOwner().get())).stream().findFirst().get())
-                .code(course.getCode().orElse(null))
+                .ownerEmail(userDetails.getUsername())
+                .code(course.getCode().get())
                 .build();
 
         courseRepository.save(courseEntity);
@@ -73,22 +77,31 @@ public class CourseService {
     }
 
     @Transactional
-    public Course putCourse(int courseId, CourseUpdate update) {
+    public Course putCourse(UserDetails userDetails, UUID courseId, CourseUpdate update) {
         return courseRepository.findById(courseId)
-                .map(entity -> updateCourse(entity, update))
+                .map(course -> validateOwner(course, userDetails))
+                .map(course -> updateCourse(course, update))
                 .map(Course::fromEntity)
                 .orElseThrow(CourseMissingException::new);
     }
 
+    private CourseEntity validateOwner(CourseEntity courseEntity, UserDetails userDetails) {
+        if (!Objects.equals(courseEntity.getOwnerEmail(), userDetails.getUsername())) {
+            throw new InvalidOwnerException();
+        }
+        return courseEntity;
+    }
+
     private CourseEntity updateCourse(CourseEntity entity, CourseUpdate update) {
         update.getName().ifPresent(entity::setName);
+        update.getCode().ifPresent(entity::setCode);
         update.getUsers().map(this::usersFrom).ifPresent(entity::setUsers);
         update.getDates().map(this::datesFrom).ifPresent(entity::setDates);
         courseRepository.save(entity);
         return entity;
     }
 
-    private Set<UserEntity> usersFrom(Set<String> emails) {
+    private Set<User> usersFrom(Set<String> emails) {
         return emails.stream()
                 .map(userRepository::findByEmail)
                 .filter(Optional::isPresent)

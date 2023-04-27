@@ -5,17 +5,18 @@ import lombok.Value;
 import pl.edu.agh.io.dzikizafrykibackend.db.entity.CourseEntity;
 
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Value
 @Builder
 public class Course {
-    int courseId;
+    UUID courseId;
     String name;
     String description;
     Set<String> users;
     Set<DateResource> dates;
-    String owner;
+    String ownerEmail;
     String code;
 
 
@@ -30,7 +31,7 @@ public class Course {
                 .dates(entity.getDates().stream()
                                .map(DateResource::fromEntity)
                                .collect(Collectors.toSet()))
-                .owner(entity.getOwner().getFirstName() + " " + entity.getOwner().getLastName())
+                .ownerEmail(entity.getOwnerEmail())
                 .code(entity.getCode())
                 .build();
     }

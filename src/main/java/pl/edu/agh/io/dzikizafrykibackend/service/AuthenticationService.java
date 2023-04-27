@@ -6,7 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.edu.agh.io.dzikizafrykibackend.db.entity.UserEntity;
+import pl.edu.agh.io.dzikizafrykibackend.db.entity.User;
 import pl.edu.agh.io.dzikizafrykibackend.db.repository.UserRepository;
 import pl.edu.agh.io.dzikizafrykibackend.exception.DuplicateUserException;
 import pl.edu.agh.io.dzikizafrykibackend.model.AuthenticationRequestResource;
@@ -30,13 +30,13 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponseResource register(RegisterRequestResource registerRequestResource) {
-        UserEntity newUser = new UserEntity(registerRequestResource.getEmail(),
-                                            registerRequestResource.getFirstName(),
-                                            registerRequestResource.getLastName(),
-                                            registerRequestResource.getRole(),
-                                            registerRequestResource.getIndexNumber(),
-                                            true,
-                                            passwordEncoder.encode(registerRequestResource.getPassword()));
+        User newUser = new User(registerRequestResource.getEmail(),
+                                registerRequestResource.getFirstName(),
+                                registerRequestResource.getLastName(),
+                                registerRequestResource.getRole(),
+                                registerRequestResource.getIndexNumber(),
+                                true,
+                                passwordEncoder.encode(registerRequestResource.getPassword()));
         if (userRepository.findByEmail(newUser.getEmail()).isPresent()) {
             throw new DuplicateUserException();
         }
@@ -50,7 +50,7 @@ public class AuthenticationService {
                         authenticationRequestResource.getPassword()
                 )
         );
-        UserEntity user = userRepository.findByEmail(authenticationRequestResource.getEmail()).orElseThrow();
+        User user = userRepository.findByEmail(authenticationRequestResource.getEmail()).orElseThrow();
         return new AuthenticationResponseResource(jwtService.generateToken(user));
     }
 }

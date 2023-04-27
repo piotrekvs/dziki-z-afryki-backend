@@ -22,7 +22,7 @@ public class CourseUpdate {
     @Builder.Default
     Optional<Set<DateResource>> dates = Optional.empty();
     @Builder.Default
-    Optional<String> owner = Optional.empty();
+    Optional<String> ownerEmail = Optional.empty();
     @Builder.Default
     Optional<String> code = Optional.empty();
 }
