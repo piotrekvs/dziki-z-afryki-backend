@@ -17,7 +17,7 @@ public class Course {
     Set<String> users;
     Set<DateResource> dates;
     String ownerEmail;
-    String code;
+    String courseCode;
 
 
     public static Course fromEntity(CourseEntity entity) {
@@ -32,7 +32,7 @@ public class Course {
                                .map(DateResource::fromEntity)
                                .collect(Collectors.toSet()))
                 .ownerEmail(entity.getOwnerEmail())
-                .code(entity.getCode())
+                .courseCode(entity.getCourseCode())
                 .build();
     }
 }

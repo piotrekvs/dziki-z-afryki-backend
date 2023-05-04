@@ -22,6 +22,7 @@ import pl.edu.agh.io.dzikizafrykibackend.exception.CourseNameMissingException;
 import pl.edu.agh.io.dzikizafrykibackend.model.Course;
 import pl.edu.agh.io.dzikizafrykibackend.model.CourseUpdate;
 import pl.edu.agh.io.dzikizafrykibackend.service.CourseService;
+import pl.edu.agh.io.dzikizafrykibackend.util.CodeGenerator;
 
 import java.util.Optional;
 import java.util.Set;
@@ -48,6 +49,9 @@ public class CourseServiceTest {
     private UserRepository userRepositoryMock;
     @Mock
     private DateRepository dateRepositoryMock;
+
+    @Mock
+    private CodeGenerator codeGenerator;
     @InjectMocks
     private CourseService courseService;
 
@@ -150,7 +154,6 @@ public class CourseServiceTest {
                 .users(EMPTY_USER_SET)
                 .dates(EMPTY_DATE_SET)
                 .ownerEmail(OWNER_EMAIL)
-                .code(COURSE_CODE)
                 .build();
 
         CourseUpdate courseUpdate = CourseUpdate.builder()
@@ -192,13 +195,11 @@ public class CourseServiceTest {
                 Arguments.of(CourseUpdate.builder()
                                      .name(Optional.of(COURSE_NAME))
                                      .ownerEmail(Optional.of(OWNER_EMAIL))
-                                     .code(Optional.of(COURSE_CODE))
                                      .build(),
                              CourseEntity.builder()
                                      .name(COURSE_NAME)
                                      .dates(Set.of())
                                      .users(Set.of())
-                                     .code(COURSE_CODE)
                                      .ownerEmail(OWNER_EMAIL)
                                      .build())
         );

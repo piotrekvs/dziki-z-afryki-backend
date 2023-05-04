@@ -46,6 +46,6 @@ public class CourseEntity {
     private String ownerEmail;
 
     @NotNull
-    @Column(name = "code")
-    private String code;
+    @Column(name = "codes", unique = true)
+    private String courseCode;
 }
